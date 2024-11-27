@@ -1,0 +1,261 @@
+openapi: 3.0.3
+info:
+  title: Music info
+  version: 0.0.1
+paths:
+  /songlibrary/songs:
+    get:
+      description: get all songs with filters and pagination
+      operationId: GetSongs
+      parameters:
+        - name: group
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: song
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: releaseDate
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: text
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: link
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/songsResponse'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+  /songlibrary/songs/{id}:
+    delete:
+      description: delete song by song ID
+      operationId: DeleteSong
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+    put:
+      description: update song by song ID
+      operationId: UpdateSong
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: group
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: song
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: releaseDate
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: text
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: link
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+  /songlibrary/songs/{id}/verses:
+    get:
+      description: get song text by song ID with pagination
+      operationId: GetSongText
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: integer
+            default: 1
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getSongTextResponse'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+  /songlibrary/info:
+    post:
+      description: add new song and get song details or get song details if song exists
+      operationId: AddSong
+      parameters:
+        - name: group
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: song
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SongDetail'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    Song:
+      required:
+        - id
+        - group
+        - song
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        group:
+          type: string
+          example: Muse
+        song:
+          type: string
+          example: Supermassive Black Hole
+
+    SongDetail:
+      required:
+        - releaseDate
+        - text
+        - link
+      type: object
+      properties:
+        releaseDate:
+          type: string
+          example: 16.07.2006
+        text:
+          type: string
+          example: Ooh baby, don't you know I suffer?\nOoh baby, can you hear me moan?\nYou caught me under false pretenses\nHow long before you let me go?\n\nOoh\nYou set my soul alight\nOoh\nYou set my soul alight
+        link:
+          type: string
+          example: https://www.youtube.com/watch?v=Xsp3_a-PMTw
+
+    getSongTextResponse:
+      required:
+        - song
+        - releaseDate
+        - text
+        - link
+      type: object
+      properties:
+        song:
+          $ref: '#/components/schemas/Song'
+        releaseDate:
+          type: string
+          example: 16.07.2006
+        text:
+          type: array
+          items:
+            allOf:
+              - type: string
+        link:
+          type: string
+          example: https://www.youtube.com/watch?v=Xsp3_a-PMTw
+
+    songResponse:
+      required:
+        - Song
+        - SongDetail
+      type: object
+      properties:
+        Song:
+          $ref: '#/components/schemas/Song'
+        SongDetail:
+          $ref: '#/components/schemas/SongDetail'
+
+    songsResponse:
+      required:
+        - songs
+      type: object
+      properties:
+        songs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Song'
